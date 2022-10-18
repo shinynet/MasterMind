@@ -1,0 +1,2 @@
+# MasterMind
+Haskell MasterMind
