@@ -55,7 +55,8 @@ executable MasterMind
 
     -- Modules included in this executable, other than Main.
     other-modules:    Types
-                    , Actions
+                    , Game
+                    , Utils
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
