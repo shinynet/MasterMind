@@ -1,13 +1,10 @@
 module Main where
 
-import           Foo   (greetUser, getLuckyNumber)
-import           Types
+import           Actions (generateSecretCode, putTitleScreen)
 
 main :: IO ()
--- main = putStrLn "Hello, Haskeller!"
 main = do
-  greeting <- greetUser
-  putStrLn greeting
-  putStrLn "Your number is: "
-  num <- getLuckyNumber
-  print num
+  -- putTitleScreen
+  secretCode <- generateSecretCode
+  print secretCode
+

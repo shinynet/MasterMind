@@ -56,13 +56,19 @@ executable MasterMind
     -- Modules included in this executable, other than Main.
     other-modules:    Types
                     , Foo
+                    , Actions
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
+    -- A list of Haskell extensions used by every module.
+    default-extensions:    InstanceSigs
+
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.14.3.0
                     , random
+                    , process
+                    , mtl
 
     -- Directories containing source files.
     hs-source-dirs:   app

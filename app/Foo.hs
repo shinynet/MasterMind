@@ -9,3 +9,12 @@ greetUser :: IO [Char]
 greetUser = do
   name <- getLine
   pure $ "Hello " ++ name ++ "!"
+
+-- main :: IO ()
+-- main = putStrLn "Hello, Haskeller!"
+-- main = do
+--   greeting <- greetUser
+--   putStrLn greeting
+--   putStrLn "Your number is: "
+--   num <- getLuckyNumber
+--   print num
