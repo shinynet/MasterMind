@@ -5,7 +5,8 @@ import           System.Console.ANSI
 import           System.IO
 
 resetScreen :: IO ()
-resetScreen = clearScreen >> setCursorPosition 0 0
+resetScreen = clearScreen 
+           >> setCursorPosition 0 0
 
 getValidChar :: IO Char
 getValidChar = do

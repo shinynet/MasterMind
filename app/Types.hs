@@ -1,22 +1,20 @@
 module Types where
 
-import           System.Random 
+import           System.Random
 
--- Player Pieces
-
-data CodePeg = CodePegB -- Blue
-             | CodePegG -- Green
-             | CodePegY -- Yellow
-             | CodePegR -- Red
-             | CodePegW -- White
-             | CodePegK -- Black
+data Color = B -- Blue
+           | G -- Green
+           | Y -- Yellow
+           | R -- Red
+           | W -- White
+           | K -- Black
   deriving (Show, Enum, Bounded)
 
-data KeyPeg = KeyPegW -- White
-            | KeyPegK -- Black
-  deriving Show
-
 -- Game Types
+
+newtype CodePeg = CodePeg Color deriving Show
+
+newtype KeyPeg = KeyPeg Color deriving Show
 
 newtype Secret = Secret [CodePeg] deriving Show
 
@@ -30,11 +28,9 @@ type GameState = (Secret, [(Attemp, Result)])
 
 -- Instances
 
-instance Random CodePeg where
-  randomR :: RandomGen g => (CodePeg, CodePeg)
-                         -> g
-                         -> (CodePeg, g)
-  randomR (a, b) g = case randomR (fromEnum a, fromEnum b) g 
+instance Random Color where
+  randomR :: RandomGen g => (Color, Color) -> g -> (Color, g)
+  randomR (a, b) g = case randomR (fromEnum a, fromEnum b) g
                        of (x, g') -> (toEnum x, g')
-  random :: RandomGen g => g -> (CodePeg, g)
+  random :: RandomGen g => g -> (Color, g)
   random = randomR (minBound, maxBound)

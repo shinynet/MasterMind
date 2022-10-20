@@ -14,5 +14,6 @@ renderTitleScreen = do
 
 generateSecret :: IO Secret
 generateSecret = do
-  Secret . take 4 . xs <$> newStdGen
-  where xs = randomRs (CodePegB, CodePegK)
+  g <- getStdGen
+  return $ Secret $ CodePeg <$> xs g
+  where xs = take 4 . randomRs (B, K)
