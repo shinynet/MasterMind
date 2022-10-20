@@ -1,10 +1,14 @@
 module Main where
 
-import           Actions (generateSecretCode, putTitleScreen)
+import           Actions (generateSecretCode, getInput, putTitleScreen)
 
 main :: IO ()
 main = do
   -- putTitleScreen
   secretCode <- generateSecretCode
-  print secretCode
+  i1 <- getInput
+  i2 <- getInput
+  i3 <- getInput
+  return ()
+  -- print secretCode
 

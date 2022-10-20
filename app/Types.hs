@@ -1,4 +1,4 @@
-module Types where
+module Types (CodePeg (..), Secret (..), Attemp) where
 
 import           System.Random (Random (random, randomR), RandomGen)
 
@@ -22,7 +22,7 @@ newtype Secret = Secret [CodePeg] deriving Show
 
 newtype Attemp = Attemp [CodePeg] deriving Show
 
-newtype Result  = Result [KeyPeg] deriving Show
+newtype Result = Result [KeyPeg] deriving Show
 
 -- State
 
