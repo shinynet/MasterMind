@@ -62,12 +62,13 @@ executable MasterMind
 
     -- A list of Haskell extensions used by every module.
     default-extensions:    InstanceSigs
+                         , OverloadedStrings
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.14.3.0
+                    , ansi-terminal
                     , random
-                    , process
-                    , mtl
+                    , text
 
     -- Directories containing source files.
     hs-source-dirs:   app

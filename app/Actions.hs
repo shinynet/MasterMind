@@ -1,52 +1,41 @@
-module Actions (putTitleScreen, generateSecretCode, getInput) where
+module Actions where
 
-import           Data.Char      (toUpper)
-import           System.IO
-import qualified System.Process as SP
-import           System.Random  (Random (randomRs), newStdGen)
-import           Types          (Attemp, CodePeg (CodePegB, CodePegK),
-                                 Secret (..))
-import           Utils          (isValidInput)
+import           Data.Char     (toUpper)
+import           System.IO     (hSetEcho, stdin)
+import           System.Random (Random (randomRs), newStdGen)
+import           Types         (CodePeg (CodePegB, CodePegK), Secret (..))
 
-generateSecretCode :: IO Secret
-generateSecretCode = do
-  g <- newStdGen
-  let pegs = take 4 (randomRs (CodePegB, CodePegK) g)
-  return $ Secret pegs
+-- Generates a random code
+-- with a length of four.
+generateCode :: IO Secret
+generateCode = do
+  Secret . take 4 . xs <$> newStdGen
+  where xs = randomRs (CodePegB, CodePegK)
 
--- Prevents input and echoing of input for invalid input
-getInput :: IO Char
-getInput = do
+-- Echos and returns
+-- a valid Char only.
+getChar' :: IO Char
+getChar' = do
+
   hSetEcho stdin False
-  input <- getChar
-  let upper = toUpper input
+  char <- getChar
   hSetEcho stdin True
-  if isValidInput upper
-    then do
-      putStr [upper]
-      return upper
-    else getInput
 
--- makeGuess :: IO Attempt
--- makeGuess = do
---   putStrLn "Take a guess..."
---   putStrLn "B (Blue), G (Green), Y (Yellow), R (Red), W (White), K (Black)"
---   c1 <- toUpper . getChar
---   c2 <- toUpper . getChar
---   c3 <- toUpper . getChar
---   c4 <- toUpper . getChar
+  let uChar = toUpper char
+      valid = isValid uChar
 
-putTitleScreen :: IO ()
-putTitleScreen = do
-  contents <- readFile "titleScreen.txt"
-  putStrLn contents
-  putStr "Press any key to continue"
-  getLine
-  clearScreen
+  if valid then do
+    putChar uChar
+    return uChar
+  else getChar'
 
-clearScreen :: IO ()
-clearScreen = do
-  SP.system "reset"
-  return ()
+  where isValid :: Char -> Bool
+        isValid 'B' = True
+        isValid 'G' = True
+        isValid 'Y' = True
+        isValid 'R' = True
+        isValid 'W' = True
+        isValid 'K' = True
+        isValid  _  = False
 
 

@@ -1,6 +1,6 @@
-module Types (CodePeg (..), Secret (..), Attemp) where
+module Types where
 
-import           System.Random (Random (random, randomR), RandomGen)
+import           System.Random 
 
 -- Player Pieces
 
@@ -34,7 +34,7 @@ instance Random CodePeg where
   randomR :: RandomGen g => (CodePeg, CodePeg)
                          -> g
                          -> (CodePeg, g)
-  randomR (a, b) g = case randomR (fromEnum a, fromEnum b) g of
-                          (x, g') -> (toEnum x, g')
+  randomR (a, b) g = case randomR (fromEnum a, fromEnum b) g 
+                       of (x, g') -> (toEnum x, g')
   random :: RandomGen g => g -> (CodePeg, g)
   random = randomR (minBound, maxBound)
