@@ -1,22 +1,23 @@
 module Utils where
 
-import           Data.Char
 import           System.Console.ANSI
 import           System.IO
+import Data.List
 
 resetScreen :: IO ()
-resetScreen = clearScreen 
-           >> setCursorPosition 0 0
+resetScreen = clearScreen >> setCursorPosition 0 0
 
-getValidChar :: IO Char
-getValidChar = do
+getValidChar :: (Char -> Char) -- input transformation
+             -> (Char -> Bool) -- pred applied to trans
+             -> IO Char
+getValidChar t p = do
   char <- getCharNoEcho
-  let uChar = toUpper char
-      valid = isValidChar uChar
-  if valid then do
-    putChar uChar
-    return uChar
-  else getValidChar
+  let newChar = t char
+      isValid = p newChar
+  if isValid then do
+    putChar newChar
+    return newChar
+  else getValidChar t p
 
 getCharNoEcho :: IO Char
 getCharNoEcho = do
@@ -25,11 +26,12 @@ getCharNoEcho = do
   hSetEcho stdin True
   return char
 
-isValidChar :: Char -> Bool
-isValidChar 'B' = True
-isValidChar 'G' = True
-isValidChar 'Y' = True
-isValidChar 'R' = True
-isValidChar 'W' = True
-isValidChar 'K' = True
-isValidChar  _  = False
+allValues :: (Bounded a, Enum a) => [a]
+allValues = [minBound..]
+
+-- intersect without duplicates
+intersect' :: Eq a => [a] -> [a] -> [a]
+intersect' xs ys = xs \\ (xs \\ ys)
+
+partitionEq :: Eq a => [(a, a)] -> ([(a, a)], [(a, a)])
+partitionEq = partition (uncurry (==))

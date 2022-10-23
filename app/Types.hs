@@ -2,31 +2,15 @@ module Types where
 
 import           System.Random
 
+-- Color
+
 data Color = B -- Blue
            | G -- Green
            | Y -- Yellow
            | R -- Red
            | W -- White
            | K -- Black
-  deriving (Show, Enum, Bounded)
-
--- Game Types
-
-newtype CodePeg = CodePeg Color deriving Show
-
-newtype KeyPeg = KeyPeg Color deriving Show
-
-newtype Secret = Secret [CodePeg] deriving Show
-
-newtype Attemp = Attemp [CodePeg] deriving Show
-
-newtype Result = Result [KeyPeg] deriving Show
-
--- State
-
-type GameState = (Secret, [(Attemp, Result)])
-
--- Instances
+  deriving (Bounded, Eq, Enum, Read, Show)
 
 instance Random Color where
   randomR :: RandomGen g => (Color, Color) -> g -> (Color, g)
@@ -34,3 +18,40 @@ instance Random Color where
                        of (x, g') -> (toEnum x, g')
   random :: RandomGen g => g -> (Color, g)
   random = randomR (minBound, maxBound)
+
+-- Peg
+
+newtype Peg a = Peg a deriving (Eq, Show)
+
+instance Functor Peg where
+  fmap :: (a -> b) -> Peg a -> Peg b
+  fmap f (Peg c) = Peg $ f c
+
+instance Applicative Peg where
+  pure :: a -> Peg a
+  pure = Peg
+  (<*>) :: Peg (a -> b) -> Peg a -> Peg b
+  (<*>) (Peg f) = fmap f
+
+instance Monad Peg where
+  (>>=) :: Peg a -> (a -> Peg b) -> Peg b
+  (>>=) (Peg x) f = f x
+
+-- Code
+
+data Guess
+data Secret
+
+newtype Code a = Code { unCode :: [Peg Color] }
+  deriving Show
+
+-- Result
+
+data NumPos
+data NumColor
+
+newtype Correct a = Correct Int
+  deriving Show
+
+type Result = ( Correct NumPos
+              , Correct NumColor)
