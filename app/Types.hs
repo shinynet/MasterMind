@@ -59,7 +59,7 @@ type Result = ( Correct NumPos
 -- Game State
 
 data GameState = GameState
-  { getSecret  :: Code Secret
-  , getGuesses :: [Code Guess] 
-  , getResults :: [Result] }
+  { unSecret  :: Code Secret
+  , unGuesses :: [Code Guess] 
+  , unResults :: [Result] }
   deriving Show

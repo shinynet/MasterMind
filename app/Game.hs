@@ -26,7 +26,7 @@ generateSecret = do
       pegList = Peg <$> colors g
       secret  :: Code Secret
       secret  = Code pegList
-  put s { getSecret = secret }
+  put s { unSecret = secret }
   where colors = take 4 . randomRs (B, K)
 
 
@@ -67,32 +67,54 @@ isCharColor c = c `elem` colorChars where
 -- pretty printing
 
 printGameState :: GameState -> IO ()
-printGameState gameState = go gameState 1 where
-  go (GameState _ [] []) _ = TIO.putStrLn ""
-  go s n = do
-    let (g:gs) = getGuesses s
-        (r:rs) = getResults s
+printGameState gameState = do
 
-    TIO.putStr $ T.pack $ "Guess " ++ show n ++ ": "
-    printGuess g
-    TIO.putStr " "
-    printResult r
+  putStrLn "P = Correct Color in Correct Position"
+  putStrLn "C = Correct Color in Incorrect Position"
+  putStrLn "---------------------------------------"
+  putStr $ replicate 4 ' ' ++  "Guess | "
+  putStr "P | "
+  putStrLn "C"
 
-    let newS = GameState {
-        getSecret  = getSecret s
-      , getGuesses = gs
-      , getResults = rs }
+  go gameState 1 where
+    go (GameState _ [] []) _ = TIO.putStrLn ""
+    go s n = do
+      let (g:gs) = unGuesses s
+          (r:rs) = unResults s
+          padN   = if n == 10 then 0 else 1
+          pad    = replicate padN ' '
 
-    go newS (n + 1)
+      TIO.putStr $ T.pack $ pad ++ show n ++ ": "
+      printCode g
+      TIO.putStr " "
+      printResult r
+
+      let newS = GameState {
+          unSecret  = unSecret s
+        , unGuesses = gs
+        , unResults = rs }
+
+      go newS (n + 1)
 
 
-printGuess :: Code Guess -> IO ()
-printGuess (Code cs) = TIO.putStr $ T.pack pegs
+printCode :: Code a -> IO ()
+printCode (Code cs) = TIO.putStr $ T.pack pegs
   where pegs = concat $ (\(Peg c) -> show c) <$> cs
 
 
 printResult :: Result -> IO ()
 printResult (Correct p, Correct c) = do
-  TIO.putStr $ T.pack $ show p
-  TIO.putStr $ T.pack $ show c
+  TIO.putStr $ T.pack $ replicate 3 ' ' ++ show p
+  TIO.putStr $ T.pack $ replicate 3 ' ' ++ show c
+  TIO.putStrLn ""
+
+
+printInstructions :: IO ()
+printInstructions = do
+  TIO.putStrLn "You have 10 tries to break the secret code."
+  TIO.putStrLn "The secret code consists of 4 colors:"
+  TIO.putStrLn "B (Blue), G (Green), Y (Yellow), R (Red),"
+  TIO.putStrLn "W (White), and K (Black)"
+  TIO.putStrLn ""
+  TIO.putStrLn "Good Luck!"
   TIO.putStrLn ""

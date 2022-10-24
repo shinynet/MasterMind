@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use print" #-}
 module Main where
 
 import           Control.Monad.State
@@ -12,18 +10,20 @@ import           Utils
 
 defaultState :: GameState
 defaultState = GameState
-  { getSecret = Code []
-  , getGuesses = []
-  , getResults = [] }
+  { unSecret = Code []
+  , unGuesses = []
+  , unResults = [] }
 
 main :: IO ()
 main = do
-  -- renderTitleScreen
+  renderTitleScreen
   state  <- execStateT generateSecret defaultState
 
-  let secret = getSecret state
-  TIO.putStr "Secret"
-  TIO.putStrLn $ T.pack $ show secret
+  -- uncomment to show secret code
+  -- let secret = unSecret state
+  -- TIO.putStr "Secret"
+  -- TIO.putStrLn $ T.pack $ show secret
+  liftIO printInstructions
 
   result <- execStateT gameLoop state
   exitSuccess
@@ -33,25 +33,28 @@ gameLoop :: StateT GameState IO ()
 gameLoop = do
   state <- get
 
-  let numGuesses = length $ getGuesses state
+  let numGuesses = length $ unGuesses state
   if numGuesses == 10 then do
     liftIO $ TIO.putStrLn "You Lose"
+    liftIO $ TIO.putStr "Secret Code: "
+    liftIO $ printCode $ unSecret state
+    liftIO $ TIO.putStrLn ""
     -- return () -- not exiting game loop!!
     liftIO exitSuccess
   else liftIO $ TIO.putStr "New Guess: "
 
   guess <- liftIO getGuess
-  let secret  = getSecret state
-      guesses = getGuesses state
+  let secret  = unSecret state
+      guesses = unGuesses state
       result  = getResult secret guess
   put state
-    { getGuesses = getGuesses state <> [guess]
-    , getResults = getResults state <> [result] }
+    { unGuesses = unGuesses state <> [guess]
+    , unResults = unResults state <> [result] }
 
   statePrint <- get
   liftIO resetScreen
+  liftIO printInstructions
   liftIO $ printGameState statePrint
-
 
   let (Correct numPos, _) = result
   if numPos == 4 then do
