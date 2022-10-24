@@ -55,3 +55,11 @@ newtype Correct a = Correct Int
 
 type Result = ( Correct NumPos
               , Correct NumColor)
+
+-- Game State
+
+data GameState = GameState
+  { getSecret  :: Code Secret
+  , getGuesses :: [Code Guess] 
+  , getResults :: [Result] }
+  deriving Show

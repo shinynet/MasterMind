@@ -68,6 +68,7 @@ executable MasterMind
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.14.3.0
                     , ansi-terminal
+                    , mtl
                     , random
                     , text
 
