@@ -3,7 +3,6 @@ module Utils where
 import           Data.List
 import           System.Console.ANSI
 import           System.IO
-import           Types
 
 resetScreen :: IO ()
 resetScreen = clearScreen >> setCursorPosition 0 0

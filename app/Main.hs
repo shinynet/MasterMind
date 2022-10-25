@@ -23,9 +23,9 @@ main = do
   -- let secret = unSecret state
   -- TIO.putStr "Secret"
   -- TIO.putStrLn $ T.pack $ show secret
-  liftIO printInstructions
+  printInstructions
 
-  result <- execStateT gameLoop state
+  execStateT gameLoop state
   exitSuccess
 
 
