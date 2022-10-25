@@ -20,7 +20,7 @@ renderTitleScreen = do
 -- for random list length
 generateSecret :: StateT GameState IO ()
 generateSecret = do
-  g <- getStdGen -- newStdGen
+  g <- newStdGen -- getStdGen
   s <- get
   let pegList :: [Peg Color]
       pegList = Peg <$> colors g
