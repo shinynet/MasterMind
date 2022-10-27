@@ -25,8 +25,7 @@ main = do
   -- TIO.putStrLn $ T.pack $ show secret
   printInstructions
 
-  execStateT gameLoop state
-  exitSuccess
+  void $ execStateT gameLoop state
 
 
 gameLoop :: StateT GameState IO ()
@@ -39,25 +38,22 @@ gameLoop = do
     liftIO $ TIO.putStr "Secret Code: "
     liftIO $ printCode $ unSecret state
     liftIO $ TIO.putStrLn ""
-    -- return () -- not exiting game loop!!
-    liftIO exitSuccess
-  else liftIO $ TIO.putStr "New Guess: "
+  else do
+    liftIO $ TIO.putStr "New Guess: "
+    guess <- liftIO getGuess
+    let secret  = unSecret state
+        guesses = unGuesses state
+        result  = getResult secret guess
+    put state
+      { unGuesses = unGuesses state <> [guess]
+      , unResults = unResults state <> [result] }
 
-  guess <- liftIO getGuess
-  let secret  = unSecret state
-      guesses = unGuesses state
-      result  = getResult secret guess
-  put state
-    { unGuesses = unGuesses state <> [guess]
-    , unResults = unResults state <> [result] }
+    statePrint <- get
+    liftIO resetScreen
+    liftIO printInstructions
+    liftIO $ printGameState statePrint
 
-  statePrint <- get
-  liftIO resetScreen
-  liftIO printInstructions
-  liftIO $ printGameState statePrint
-
-  let (Correct numPos, _) = result
-  if numPos == 4 then do
-    liftIO $ TIO.putStrLn "You Win!"
-    return ()
-  else gameLoop
+    let (Correct numPos, _) = result
+    if numPos == 4 then do
+      liftIO $ TIO.putStrLn "You Win!"
+    else gameLoop
