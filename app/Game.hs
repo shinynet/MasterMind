@@ -22,12 +22,11 @@ generateSecret :: StateT GameState IO ()
 generateSecret = do
   g <- newStdGen -- getStdGen
   s <- get
-  let pegList :: [Peg Color]
-      pegList = Peg <$> colors g
-      secret  :: Code Secret
-      secret  = Code pegList
+  let colors :: [Color]
+      colors = mkColors g
+      secret  = Code colors
   put s { unSecret = secret }
-  where colors = take 4 . randomRs (B, K)
+  where mkColors = take 4 . randomRs (B, K)
 
 
 -- TODO: utilize Reader/State
@@ -40,8 +39,7 @@ getGuess = do
   char4 <- getValidChar toUpper isCharColor
   let chars  = [char1, char2, char3, char4]
       colors = read . pure <$> chars
-      pegs   = Peg <$> colors
-  return $ Code pegs
+  return $ Code colors
 
 
 -- TODO: utilize Reader/State
@@ -51,7 +49,7 @@ getResult (Code s) (Code g) =
   ( Correct $ length cp
   , Correct $ length cc )
   where
-    zipped :: [(Peg Color, Peg Color)]
+    zipped :: [(Color, Color)]
     zipped   = zip s g
     (cp, ip) = partitionEq zipped
     (rs, rg) = unzip ip
@@ -98,8 +96,8 @@ printGameState gameState = do
 
 
 printCode :: Code a -> IO ()
-printCode (Code cs) = TIO.putStr $ T.pack pegs
-  where pegs = concat $ (\(Peg c) -> show c) <$> cs
+printCode (Code colors) = TIO.putStr $ T.pack chars
+  where chars = concat $ show <$> colors
 
 
 printResult :: Result -> IO ()
