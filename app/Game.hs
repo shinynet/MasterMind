@@ -4,13 +4,28 @@ import           Control.Monad.State
 import           Data.Char
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as TIO
+import qualified System.Console.ANSI as ANSI
 import           System.Random
 import           Types
 import           Utils
 
 renderTitleScreen :: IO ()
 renderTitleScreen = do
-  TIO.putStrLn =<< TIO.readFile "title.txt"
+  Just (_, width) <- ANSI.getTerminalSize
+  if width >= 100
+    then TIO.putStrLn =<< TIO.readFile "title.txt"
+    else do 
+      ANSI.setSGR
+        [ ANSI.SetConsoleIntensity ANSI.BoldIntensity
+        , ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue
+        ]
+      TIO.putStr "Master"
+      ANSI.setSGR
+        [ ANSI.SetConsoleIntensity ANSI.BoldIntensity
+        , ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red
+        ]
+      TIO.putStrLn "Mind\n"
+      ANSI.setSGR []
   TIO.putStr "Press any key to continue "
   getChar
   resetScreen
@@ -81,8 +96,25 @@ printLine = do
 
 
 printCode :: Code a -> IO ()
-printCode (Code colors) = TIO.putStr $ T.pack chars
-  where chars = concat $ show <$> colors
+printCode (Code []) = ANSI.setSGR []
+printCode (Code (c:cs)) = do
+  let color = case c of
+        B -> ANSI.Blue
+        G -> ANSI.Green
+        Y -> ANSI.Yellow
+        R -> ANSI.Red
+        W -> ANSI.White
+        K -> ANSI.Black
+  ANSI.setSGR
+    [ ANSI.SetConsoleIntensity ANSI.BoldIntensity
+    , ANSI.SetColor ANSI.Foreground ANSI.Vivid color
+    ]
+  TIO.putStr $ T.pack $ " " ++ show c ++ " "
+  printCode $ Code cs
+
+
+printColor :: Color -> IO ()
+printColor color = putStr $ show color
 
 
 printResult :: Result -> IO ()
@@ -103,6 +135,11 @@ printInstructions = do
   TIO.putStrLn "P = Correct Color in Correct Position"
   TIO.putStrLn "C = Correct Color in Incorrect Position"
   TIO.putStrLn "---------------------------------------"
-  TIO.putStrLn $ T.pack $ mconcat $ replicate 4 ' ' : 
-    ["Guess | ", "P | ", "C"]
+  TIO.putStrLn $ T.pack $ mconcat
+    [ replicate 6 ' '
+    , "Guess"
+    , replicate 9 ' '
+    , "P"
+    , replicate 3 ' '
+    , "C" ]
 
