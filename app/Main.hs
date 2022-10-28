@@ -4,9 +4,7 @@ import           Control.Monad.State
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as TIO
 import           Game
-import           System.Exit
 import           Types
-import           Utils
 
 defaultState :: GameState
 defaultState = GameState
@@ -16,15 +14,12 @@ defaultState = GameState
 
 main :: IO ()
 main = do
-  renderTitleScreen
   state  <- execStateT generateSecret defaultState
-
-  -- uncomment to show secret code
-  -- let secret = unSecret state
-  -- TIO.putStr "Secret"
-  -- TIO.putStrLn $ T.pack $ show secret
+  renderTitleScreen
   printInstructions
-
+  -- uncomment to show secret code
+  -- TIO.putStr "Secret: "
+  -- printCode (unSecret state)
   void $ execStateT gameLoop state
 
 
@@ -33,27 +28,27 @@ gameLoop = do
   state <- get
 
   let numGuesses = length $ unGuesses state
+
+  -- maximum tries reached
   if numGuesses == 10 then do
-    liftIO $ TIO.putStrLn "You Lose"
+    liftIO $ TIO.putStrLn "\nYou Lose"
     liftIO $ TIO.putStr "Secret Code: "
     liftIO $ printCode $ unSecret state
     liftIO $ TIO.putStrLn ""
+
+  -- make guess
   else do
-    liftIO $ TIO.putStr "New Guess: "
+    liftIO $ TIO.putStr "\nNew Guess: "
     guess <- liftIO getGuess
     let secret  = unSecret state
         guesses = unGuesses state
         result  = getResult secret guess
-    put state
-      { unGuesses = unGuesses state <> [guess]
-      , unResults = unResults state <> [result] }
+    put state { unGuesses = guess  : unGuesses state
+              , unResults = result : unResults state }
+    printLine
 
-    statePrint <- get
-    liftIO resetScreen
-    liftIO printInstructions
-    liftIO $ printGameState statePrint
-
+    -- winning answer
     let (Correct numPos, _) = result
     if numPos == 4 then do
-      liftIO $ TIO.putStrLn "You Win!"
+      liftIO $ TIO.putStrLn "\nYou Win!"
     else gameLoop

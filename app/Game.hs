@@ -64,35 +64,20 @@ isCharColor c = c `elem` colorChars where
 
 -- pretty printing
 
-printGameState :: GameState -> IO ()
-printGameState gameState = do
-
-  putStrLn "P = Correct Color in Correct Position"
-  putStrLn "C = Correct Color in Incorrect Position"
-  putStrLn "---------------------------------------"
-  putStr $ replicate 4 ' ' ++  "Guess | "
-  putStr "P | "
-  putStrLn "C"
-
-  go gameState 1 where
-    go (GameState _ [] []) _ = TIO.putStrLn ""
-    go s n = do
-      let (g:gs) = unGuesses s
-          (r:rs) = unResults s
-          padN   = if n == 10 then 0 else 1
-          pad    = replicate padN ' '
-
-      TIO.putStr $ T.pack $ pad ++ show n ++ ": "
-      printCode g
-      TIO.putStr " "
-      printResult r
-
-      let newS = GameState {
-          unSecret  = unSecret s
-        , unGuesses = gs
-        , unResults = rs }
-
-      go newS (n + 1)
+printLine :: StateT GameState IO ()
+printLine = do
+  liftIO resetLine
+  state <- get
+  let guesses = unGuesses state
+      results = unResults state
+      guess   = head guesses
+      result  = head results
+      count   = length guesses
+      pad | count >= 10 = " "
+          | otherwise = "  "
+  liftIO $ TIO.putStr $ T.pack $ pad ++ show count ++ ": "
+  liftIO $ printCode guess
+  liftIO $ printResult result
 
 
 printCode :: Code a -> IO ()
@@ -102,9 +87,8 @@ printCode (Code colors) = TIO.putStr $ T.pack chars
 
 printResult :: Result -> IO ()
 printResult (Correct p, Correct c) = do
-  TIO.putStr $ T.pack $ replicate 3 ' ' ++ show p
-  TIO.putStr $ T.pack $ replicate 3 ' ' ++ show c
-  TIO.putStrLn ""
+  TIO.putStr   $ T.pack $ replicate 3 ' ' ++ show p
+  TIO.putStrLn $ T.pack $ replicate 3 ' ' ++ show c
 
 
 printInstructions :: IO ()
@@ -116,3 +100,9 @@ printInstructions = do
   TIO.putStrLn ""
   TIO.putStrLn "Good Luck!"
   TIO.putStrLn ""
+  TIO.putStrLn "P = Correct Color in Correct Position"
+  TIO.putStrLn "C = Correct Color in Incorrect Position"
+  TIO.putStrLn "---------------------------------------"
+  TIO.putStrLn $ T.pack $ mconcat $ replicate 4 ' ' : 
+    ["Guess | ", "P | ", "C"]
+

@@ -4,9 +4,6 @@ import           Data.List
 import           System.Console.ANSI
 import           System.IO
 
-resetScreen :: IO ()
-resetScreen = clearScreen >> setCursorPosition 0 0
-
 getValidChar :: (Char -> Char) -- input transformation
              -> (Char -> Bool) -- pred applied to trans
              -> IO Char
@@ -35,3 +32,11 @@ intersect' xs ys = xs \\ (xs \\ ys)
 
 partitionEq :: Eq a => [(a, a)] -> ([(a, a)], [(a, a)])
 partitionEq = partition (uncurry (==))
+
+-- screen utils
+
+resetScreen :: IO ()
+resetScreen = clearScreen >> setCursorPosition 0 0
+
+resetLine :: IO ()
+resetLine = clearLine >> setCursorColumn 0 >> cursorUpLine 0
