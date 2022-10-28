@@ -11,8 +11,9 @@ import           Utils
 
 renderTitleScreen :: IO ()
 renderTitleScreen = do
+  resetScreen
   Just (_, width) <- ANSI.getTerminalSize
-  if width >= 100
+  if width >= 80
     then TIO.putStrLn =<< TIO.readFile "title.txt"
     else do
       ANSI.setSGR
@@ -110,10 +111,6 @@ printCode (Code (c:cs)) = do
   printCode $ Code cs
 
 
-printColor :: Color -> IO ()
-printColor color = putStr $ show color
-
-
 printResult :: Result -> IO ()
 printResult (Correct p, Correct c) = do
   TIO.putStr   $ T.pack $ replicate 3 ' ' ++ show p
@@ -129,9 +126,9 @@ printInstructions = do
   TIO.putStrLn ""
   TIO.putStrLn "Good Luck!"
   TIO.putStrLn ""
-  TIO.putStrLn "P = Correct Color in Correct Position"
-  TIO.putStrLn "C = Correct Color in Incorrect Position"
-  TIO.putStrLn "---------------------------------------"
+  TIO.putStrLn "P = Colors in Correct Position"
+  TIO.putStrLn "C = Colors in Incorrect Position"
+  TIO.putStrLn "--------------------------------"
   TIO.putStrLn $ T.pack $ mconcat
     [ replicate 6 ' '
     , "Guess"

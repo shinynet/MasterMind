@@ -16,6 +16,7 @@ getValidChar t p = do
     return newChar
   else getValidChar t p
 
+
 getCharNoEcho :: IO Char
 getCharNoEcho = do
   hSetEcho stdin False
@@ -23,12 +24,15 @@ getCharNoEcho = do
   hSetEcho stdin True
   return char
 
+
 allValues :: (Bounded a, Enum a) => [a]
 allValues = [minBound..]
+
 
 -- intersect without duplicates
 intersect' :: Eq a => [a] -> [a] -> [a]
 intersect' xs ys = xs \\ (xs \\ ys)
+
 
 partitionEq :: Eq a => [(a, a)] -> ([(a, a)], [(a, a)])
 partitionEq = partition (uncurry (==))
@@ -37,6 +41,7 @@ partitionEq = partition (uncurry (==))
 
 resetScreen :: IO ()
 resetScreen = clearScreen >> setCursorPosition 0 0
+
 
 resetLine :: IO ()
 resetLine = clearLine >> setCursorColumn 0 >> cursorUpLine 0

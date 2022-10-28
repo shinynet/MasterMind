@@ -20,7 +20,7 @@ main = do
   -- uncomment to show secret code
   -- TIO.putStr "Secret: "
   -- printCode (unSecret state)
-  void $ execStateT gameLoop state
+  void $ runStateT gameLoop state
 
 
 gameLoop :: StateT GameState IO ()
