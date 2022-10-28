@@ -14,16 +14,13 @@ renderTitleScreen = do
   Just (_, width) <- ANSI.getTerminalSize
   if width >= 100
     then TIO.putStrLn =<< TIO.readFile "title.txt"
-    else do 
+    else do
       ANSI.setSGR
         [ ANSI.SetConsoleIntensity ANSI.BoldIntensity
-        , ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue
-        ]
+        , ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue ]
       TIO.putStr "Master"
       ANSI.setSGR
-        [ ANSI.SetConsoleIntensity ANSI.BoldIntensity
-        , ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red
-        ]
+        [ ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red ]
       TIO.putStrLn "Mind\n"
       ANSI.setSGR []
   TIO.putStr "Press any key to continue "
