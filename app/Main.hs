@@ -41,17 +41,17 @@ gameLoop = do
   -- make guess
   else do
     liftIO $ TIO.putStr "\nNew Guess: "
-    guess <- liftIO $ evalStateT (runReaderT getGuess e) s
+    (guess, s') <- liftIO $ runStateT (runReaderT getGuess e) s
 
     let secret  = unSecret s
         guesses = unGuesses s
-        result  = getResult secret guess
-    put s { unGuesses = guess  : unGuesses s
-          , unResults = result : unResults s }
-    printLine
+        (result, s'')  = runState getResult' s'
+
+    liftIO $ runStateT (runReaderT printLine e) s''
 
     -- winning answer
     let (Correct numPos, _) = result
     if numPos == 4 then do
       liftIO $ TIO.putStrLn "\nYou Win!"
-    else gameLoop
+    else do
+      liftIO $ evalStateT (runReaderT gameLoop e) s''

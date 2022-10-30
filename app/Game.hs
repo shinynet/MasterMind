@@ -56,18 +56,24 @@ getGuess = do
   return code
 
 
--- TODO: utilize Reader/State
--- for referencing Secret Code
-getResult :: Code Secret -> Code Guess -> Result
-getResult (Code s) (Code g) =
-  ( Correct $ length cp
-  , Correct $ length cc )
-  where
-    zipped :: [(Color, Color)]
-    zipped   = zip s g
-    (cp, ip) = partitionEq zipped
-    (rs, rg) = unzip ip
-    cc       = intersect' rs rg
+getResult' :: State GameState Result
+getResult' = do
+  s <- get
+
+  let (Code secret)    = unSecret s
+      ((Code guess):_) = unGuesses s
+      results          = unResults s
+
+  let zipped   = zip secret guess
+      (cp, ip) = partitionEq zipped
+      (rs, rg) = unzip ip
+      cc       = intersect' rs rg
+
+  let result = ( Correct $ length cp
+               , Correct $ length cc )
+
+  put s { unResults = result:results }
+  return result
 
 
 isCharColor :: Char -> Bool
