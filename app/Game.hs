@@ -42,17 +42,18 @@ generateSecret = do
   where mkColors g codeLen = take codeLen $ randomRs (B, K) g
 
 
--- TODO: utilize Reader/State
--- for Guess list length
-getGuess :: IO (Code Guess)
+getGuess :: ReaderT GameEnv (StateT GameState IO) (Code Guess)
 getGuess = do
-  char1 <- getValidChar toUpper isCharColor
-  char2 <- getValidChar toUpper isCharColor
-  char3 <- getValidChar toUpper isCharColor
-  char4 <- getValidChar toUpper isCharColor
-  let chars  = [char1, char2, char3, char4]
-      colors = read . pure <$> chars
-  return $ Code colors
+  s <- get
+  e <- ask
+  let codeLen = unCodeLength e
+      guesses = unGuesses s
+
+  chars <- replicateM codeLen (liftIO $ getValidChar toUpper isCharColor)
+  let code = Code $ read . pure <$> chars
+  put s { unGuesses = code:guesses }
+
+  return code
 
 
 -- TODO: utilize Reader/State
@@ -77,7 +78,7 @@ isCharColor c = c `elem` colorChars where
 
 -- pretty printing
 
-printLine :: StateT GameState IO ()
+printLine :: ReaderT GameEnv (StateT GameState IO) ()
 printLine = do
   liftIO resetLine
   state <- get

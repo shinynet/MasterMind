@@ -10,42 +10,44 @@ import           Types
 initialState :: GameState
 initialState = GameState (Code []) [] []
 
-initialEnv :: GameEnv
-initialEnv = GameEnv 4 10
+env :: GameEnv
+env = GameEnv 4 10
 
 main :: IO ()
 main = do
-  state  <- execStateT (runReaderT generateSecret initialEnv) initialState
+  state  <- execStateT (runReaderT generateSecret env) initialState
   renderTitleScreen
   printInstructions
   -- uncomment to show secret code
   -- TIO.putStr "Secret: "
   -- printCode (unSecret state)
-  void $ runStateT gameLoop state
+  void $ runStateT (runReaderT gameLoop env) state
 
 
-gameLoop :: StateT GameState IO ()
+gameLoop :: ReaderT GameEnv (StateT GameState IO) ()
 gameLoop = do
-  state <- get
+  s <- get
+  e <- ask
 
-  let numGuesses = length $ unGuesses state
+  let numGuesses = length $ unGuesses s
 
   -- maximum tries reached
   if numGuesses == 10 then do
     liftIO $ TIO.putStrLn "\nYou Lose"
     liftIO $ TIO.putStr "Secret Code: "
-    liftIO $ printCode $ unSecret state
+    liftIO $ printCode $ unSecret s
     liftIO $ TIO.putStrLn ""
 
   -- make guess
   else do
     liftIO $ TIO.putStr "\nNew Guess: "
-    guess <- liftIO getGuess
-    let secret  = unSecret state
-        guesses = unGuesses state
+    guess <- liftIO $ evalStateT (runReaderT getGuess e) s
+
+    let secret  = unSecret s
+        guesses = unGuesses s
         result  = getResult secret guess
-    put state { unGuesses = guess  : unGuesses state
-              , unResults = result : unResults state }
+    put s { unGuesses = guess  : unGuesses s
+          , unResults = result : unResults s }
     printLine
 
     -- winning answer
