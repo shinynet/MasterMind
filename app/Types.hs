@@ -40,6 +40,11 @@ type Result = ( Correct NumPos
 
 -- Game State
 
+data GameEnv = GameEnv
+  { unCodeLength :: Int
+  , unNumGuesses :: Int
+  } deriving Show
+
 data GameState = GameState
   { unSecret  :: Code Secret
   , unGuesses :: [Code Guess]

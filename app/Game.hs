@@ -1,10 +1,11 @@
 module Game where
 
+import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.Char
-import qualified Data.Text           as T
-import qualified Data.Text.IO        as TIO
-import qualified System.Console.ANSI as ANSI
+import qualified Data.Text            as T
+import qualified Data.Text.IO         as TIO
+import qualified System.Console.ANSI  as ANSI
 import           System.Random
 import           Types
 import           Utils
@@ -29,17 +30,16 @@ renderTitleScreen = do
   resetScreen
 
 
--- TODO: utilize Reader/State
--- for random list length
-generateSecret :: StateT GameState IO ()
+generateSecret :: ReaderT GameEnv (StateT GameState IO) ()
 generateSecret = do
   g <- newStdGen -- getStdGen
   s <- get
-  let colors :: [Color]
-      colors = mkColors g
+  e <- ask
+  let codeLen = unCodeLength e
+      colors  = mkColors g codeLen
       secret  = Code colors
   put s { unSecret = secret }
-  where mkColors = take 4 . randomRs (B, K)
+  where mkColors g codeLen = take codeLen $ randomRs (B, K) g
 
 
 -- TODO: utilize Reader/State

@@ -1,20 +1,21 @@
 module Main where
 
+import           Control.Monad.Reader
 import           Control.Monad.State
-import qualified Data.Text           as T
-import qualified Data.Text.IO        as TIO
+import qualified Data.Text            as T
+import qualified Data.Text.IO         as TIO
 import           Game
 import           Types
 
-defaultState :: GameState
-defaultState = GameState
-  { unSecret = Code []
-  , unGuesses = []
-  , unResults = [] }
+initialState :: GameState
+initialState = GameState (Code []) [] []
+
+initialEnv :: GameEnv
+initialEnv = GameEnv 4 10
 
 main :: IO ()
 main = do
-  state  <- execStateT generateSecret defaultState
+  state  <- execStateT (runReaderT generateSecret initialEnv) initialState
   renderTitleScreen
   printInstructions
   -- uncomment to show secret code
