@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use <&>" #-}
 module Main where
 
 import           Control.Monad.Reader
@@ -7,6 +9,7 @@ import qualified Data.Text.IO         as TIO
 import           Game
 import           Types
 
+
 initialState :: GameState
 initialState = GameState (Code []) [] []
 
@@ -15,13 +18,13 @@ env = GameEnv 4 10
 
 main :: IO ()
 main = do
-  state  <- execStateT (runReaderT generateSecret env) initialState
+  s <- execStateT (runReaderT generateSecret env) initialState
   renderTitleScreen
   printInstructions
   -- uncomment to show secret code
   -- TIO.putStr "Secret: "
   -- printCode (unSecret state)
-  void $ runStateT (runReaderT gameLoop env) state
+  void $ runStateT (runReaderT gameLoop env) s
 
 
 gameLoop :: ReaderT GameEnv (StateT GameState IO) ()
@@ -30,9 +33,11 @@ gameLoop = do
   e <- ask
 
   let numGuesses = length $ unGuesses s
+      maxGuesses = unNumGuesses e
+      codeLength = unCodeLength e
 
   -- maximum tries reached
-  if numGuesses == 10 then do
+  if numGuesses == maxGuesses then do
     liftIO $ TIO.putStrLn "\nYou Lose"
     liftIO $ TIO.putStr "Secret Code: "
     liftIO $ printCode $ unSecret s
@@ -51,7 +56,7 @@ gameLoop = do
 
     -- winning answer
     let (Correct numPos, _) = result
-    if numPos == 4 then do
+    if numPos == codeLength then do
       liftIO $ TIO.putStrLn "\nYou Win!"
     else do
       liftIO $ evalStateT (runReaderT gameLoop e) s''

@@ -139,7 +139,7 @@ printInstructions = do
   TIO.putStrLn $ T.pack $ mconcat
     [ replicate 6 ' '
     , "Guess"
-    , replicate 9 ' '
+    , replicate 9 ' ' -- TODO: calculate based on code length
     , "P"
     , replicate 3 ' '
     , "C" ]

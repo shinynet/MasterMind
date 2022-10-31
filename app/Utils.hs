@@ -4,6 +4,7 @@ import           Data.List
 import           System.Console.ANSI
 import           System.IO
 
+
 getValidChar :: (Char -> Char) -- input transformation
              -> (Char -> Bool) -- pred applied to trans
              -> IO Char
