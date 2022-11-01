@@ -3,12 +3,15 @@ module Game where
 import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.Char
+import           Data.Maybe
 import qualified Data.Text            as T
 import qualified Data.Text.IO         as TIO
 import qualified System.Console.ANSI  as ANSI
 import           System.Random
+import           Text.Read            hiding (get)
 import           Types
 import           Utils
+
 
 renderTitleScreen :: IO ()
 renderTitleScreen = do
@@ -25,9 +28,22 @@ renderTitleScreen = do
         [ ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red ]
       TIO.putStrLn "Mind\n"
       ANSI.setSGR []
-  TIO.putStr "Press any key to continue "
-  getChar
+
+
+getEnvironment :: IO GameEnv
+getEnvironment = do
+  putStrLn "Set Code Length (default 4)"
+  codeLengthInput <- getLine
+  putStrLn "Set Number of Tries (default 10)"
+  numGuessesInput <- getLine
+
+  let codeLength = Data.Maybe.fromMaybe 4
+        (readMaybe codeLengthInput :: Maybe Int)
+      numGuesses = Data.Maybe.fromMaybe 10
+        (readMaybe numGuessesInput :: Maybe Int)
+
   resetScreen
+  return $ GameEnv codeLength numGuesses
 
 
 generateSecret :: ReaderT GameEnv (StateT GameState IO) ()
@@ -82,6 +98,7 @@ isCharColor c = c `elem` colorChars where
   allColors  = allValues
   colorChars = concat $ show <$> allColors
 
+
 -- pretty printing
 
 printLine :: ReaderT GameEnv (StateT GameState IO) ()
@@ -124,23 +141,27 @@ printResult (Correct p, Correct c) = do
   TIO.putStrLn $ T.pack $ replicate 3 ' ' ++ show c
 
 
-printInstructions :: IO ()
+printInstructions :: ReaderT GameEnv IO ()
 printInstructions = do
-  TIO.putStrLn "You have 10 tries to break the secret code."
-  TIO.putStrLn "The secret code consists of 4 colors:"
-  TIO.putStrLn "B (Blue), G (Green), Y (Yellow), R (Red),"
-  TIO.putStrLn "W (White), and K (Black)"
-  TIO.putStrLn ""
-  TIO.putStrLn "Good Luck!"
-  TIO.putStrLn ""
-  TIO.putStrLn "P = Colors in Correct Position"
-  TIO.putStrLn "C = Colors in Incorrect Position"
-  TIO.putStrLn "--------------------------------"
-  TIO.putStrLn $ T.pack $ mconcat
+  GameEnv codeLength numGuesses <- ask
+
+  putString $ T.pack $
+    "You have " ++ show numGuesses ++ " tries to break the secret code."
+  putString $ T.pack $
+    "The secret code consists of " ++ show codeLength ++ " colors:"
+  putString "B (Blue), G (Green), Y (Yellow), R (Red),"
+  putString "W (White), and K (Black)"
+  putString ""
+  putString "Good Luck!"
+  putString ""
+  putString "P = Colors in Correct Position"
+  putString "C = Colors in Incorrect Position"
+  putString "--------------------------------"
+  putString $ T.pack $ mconcat
     [ replicate 6 ' '
     , "Guess"
     , replicate 9 ' ' -- TODO: calculate based on code length
     , "P"
     , replicate 3 ' '
     , "C" ]
-
+  where putString str = liftIO $ TIO.putStrLn str

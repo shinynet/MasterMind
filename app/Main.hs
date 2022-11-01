@@ -7,24 +7,24 @@ import           Control.Monad.State
 import qualified Data.Text            as T
 import qualified Data.Text.IO         as TIO
 import           Game
+import           System.IO
 import           Types
 
 
 initialState :: GameState
 initialState = GameState (Code []) [] []
 
-env :: GameEnv
-env = GameEnv 4 10
-
 main :: IO ()
 main = do
-  s <- execStateT (runReaderT generateSecret env) initialState
+  hSetBuffering stdin NoBuffering
   renderTitleScreen
-  printInstructions
+  e <- getEnvironment
+  s <- execStateT (runReaderT generateSecret e) initialState
+  void $ runReaderT printInstructions e
   -- uncomment to show secret code
   -- TIO.putStr "Secret: "
   -- printCode (unSecret state)
-  void $ runStateT (runReaderT gameLoop env) s
+  void $ runStateT (runReaderT gameLoop e) s
 
 
 gameLoop :: ReaderT GameEnv (StateT GameState IO) ()
